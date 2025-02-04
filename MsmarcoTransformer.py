@@ -8,8 +8,13 @@ def loadDatasets():
 
 def transformPassages(entry):
     return {
+        # transform positive/negative document to id
         "positive_document_ids": [[passage['docid'] for passage in passages] for passages in entry['positive_passages']],
-        "negative_document_ids": [[passage['docid'] for passage in passages] for passages in entry['negative_passages']]
+        "negative_document_ids": [[passage['docid'] for passage in passages] for passages in entry['negative_passages']],
+        # add query_image and source attributes
+        "query_image": [None] * len(entry["query"]),
+        "source": ["msmarco"] * len(entry["query"]),
+        "answer": [None] * len(entry["query"]),
     }
 
 def transformDataset(ds):
@@ -19,11 +24,8 @@ def transformDataset(ds):
     # rename attributes
     trans_ds = trans_ds.rename_column("query", "query_text")
     # update old column attribute types
-    trans_ds = trans_ds.cast_column("query_image", Image()).cast_column("positive_document_ids", Sequence(Value("string"))).cast_column("negative_document_ids", Sequence(Value("string")))
+    trans_ds = trans_ds.cast_column("answer", Value("string")).cast_column("query_image", Image()).cast_column("positive_document_ids", Sequence(Value("string"))).cast_column("negative_document_ids", Sequence(Value("string")))
 
-    # add query_image and source attributes
-    new_source_column = ["msmarco"] * len(ds)
-    trans_ds = trans_ds.add_column("source", new_source_column)
     # reorder columns
     return trans_ds.select_columns(['query_id', 'query_text', 'query_image', 'positive_document_ids', 'negative_document_ids', 'source'])
 
