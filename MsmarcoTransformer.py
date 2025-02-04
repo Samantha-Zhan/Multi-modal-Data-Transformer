@@ -11,7 +11,7 @@ def transformPassages(entry):
         # transform positive/negative document to id
         "positive_document_ids": [[passage['docid'] for passage in passages] for passages in entry['positive_passages']],
         "negative_document_ids": [[passage['docid'] for passage in passages] for passages in entry['negative_passages']],
-        # add query_image and source attributes
+        # add query_image, source attributes, and answer
         "query_image": [None] * len(entry["query"]),
         "source": ["msmarco"] * len(entry["query"]),
         "answer": [None] * len(entry["query"]),
@@ -27,7 +27,7 @@ def transformDataset(ds):
     trans_ds = trans_ds.cast_column("answer", Value("string")).cast_column("query_image", Image()).cast_column("positive_document_ids", Sequence(Value("string"))).cast_column("negative_document_ids", Sequence(Value("string")))
 
     # reorder columns
-    return trans_ds.select_columns(['query_id', 'query_text', 'query_image', 'positive_document_ids', 'negative_document_ids', 'source'])
+    return trans_ds.select_columns(['query_id', 'query_text', 'query_image', 'positive_document_ids', 'negative_document_ids', 'answer', 'source'])
 
 def uploadDataset(new_dsDict):
     new_dsDict.push_to_hub("SamanthaZJQ/msmarco-passage-2.0")
