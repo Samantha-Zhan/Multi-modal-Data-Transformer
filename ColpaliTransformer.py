@@ -6,20 +6,20 @@ def loadDatasets():
     ds = load_dataset("vidore/colpali_train_set")
     return ds
 
-def transformPassages(entry):
+def transformPassages(entry, indices):
     num_row = len(entry["query"])
     return {
         # transform positive/negative document to id
-        "positive_document_ids": [[str(i)] for i in range(num_row)],
+        "positive_document_ids": [[str(i)] for i in indices],
         "negative_document_ids": [[] for i in range(num_row)],
         # add attributes
-        "query_id": [str(i) for i in range(num_row)],
+        "query_id": [str(i) for i in indices],
         "query_image": [None] * num_row,
         "source": ["colpali: "+str(source) for source in entry['source']],
     }
 
 def transformDataset(ds):
-    trans_ds = ds.map(transformPassages, remove_columns=["options", "page", "model", "prompt", "answer_type", "image", "image_filename"], batched=True)
+    trans_ds = ds.map(transformPassages, remove_columns=["options", "page", "model", "prompt", "answer_type", "image", "image_filename"], batched=True, with_indices=True, num_proc=8)
 
     # rename attributes
     trans_ds = trans_ds.rename_column("query", "query_text")

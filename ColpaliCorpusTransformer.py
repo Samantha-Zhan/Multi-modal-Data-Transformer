@@ -6,16 +6,16 @@ def loadDatasets():
     ds = load_dataset("vidore/colpali_train_set")
     return ds
 
-def transformPassages(entry):
+def transformPassages(entry, indices):
     num_row = len(entry["query"])
     return {
-        "docid": [str(i) for i in range(num_row)],
+        "docid": [str(i) for i in indices],
         "text": [None] * num_row,
         "source": ["colpali:"+str(source) for source in entry['image_filename']],
     }
 
 def transformDataset(ds):
-    trans_ds = ds.map(transformPassages, batched=True, num_proc=8)
+    trans_ds = ds.map(transformPassages, batched=True, with_indices=True, num_proc=8)
 
     # update column attribute types
     trans_ds = trans_ds.cast_column("text", Value("string"))
