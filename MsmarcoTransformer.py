@@ -2,7 +2,7 @@ from datasets import load_dataset, load_dataset_builder, Image, DatasetDict, Val
 
 def loadDatasets():
     # available splits: ['train', 'dev', 'dl19', 'dl20']
-    dsDict = load_dataset("Tevatron/msmarco-passage")
+    dsDict = load_dataset("Tevatron/msmarco-passage-aug")
     return dsDict
 
 
@@ -19,7 +19,7 @@ def transformPassages(entry):
 
 def transformDataset(ds):
     # convert document_ids to store a list of string docid
-    trans_ds = ds.map(transformPassages, remove_columns=["positive_passages", "negative_passages"], batched=True)
+    trans_ds = ds.map(transformPassages, remove_columns=["positive_passages", "negative_passages"], batched=True, num_proc=8)
     
     # rename attributes
     trans_ds = trans_ds.rename_column("query", "query_text")
@@ -30,7 +30,7 @@ def transformDataset(ds):
     return trans_ds.select_columns(['query_id', 'query_text', 'query_image', 'positive_document_ids', 'negative_document_ids', 'answer', 'source'])
 
 def uploadDataset(new_dsDict):
-    new_dsDict.push_to_hub("SamanthaZJQ/msmarco-passage-2.0")
+    new_dsDict.push_to_hub("SamanthaZJQ/msmarco-passage-aug-2.0")
 
 def main():
     dsDict = loadDatasets()
@@ -40,7 +40,7 @@ def main():
     uploadDataset(DatasetDict(dsDict))
     # # verify feature
     print("-------------------")
-    print(load_dataset_builder("SamanthaZJQ/msmarco-passage-2.0").info.features)
+    print(load_dataset_builder("SamanthaZJQ/msmarco-passage-aug-2.0").info.features)
 
 
 if __name__=="__main__":
